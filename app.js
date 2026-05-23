@@ -64,6 +64,35 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!')
 })
 
+
+app.get("/login", async (req, res) => {
+
+    const { email, password } = req.query
+
+    const users = await getUsers()
+
+    // CHECK EMAIL
+    const user = users.find(
+        u => u.email === email
+    )
+
+    if(!user){
+        return res.status(404).json({
+            message: "Email does not exist"
+        })
+    }
+
+    // CHECK PASSWORD
+    if(user.password !== password){
+        return res.status(401).json({
+            message: "Wrong password"
+        })
+    }
+
+    // LOGIN SUCCESS
+    res.status(200).json(user)
+})
+
 app.listen(5000, () => {
   console.log("Server running on 5000")
 })
