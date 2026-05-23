@@ -1,12 +1,26 @@
 import express from 'express'
-import  {getUsers, getUser ,createNote } from './database.js'
+import cors from 'cors'
+import {
+  getUsers,
+  getUser,
+  createUser,
+  getRestaurants,
+  getRestaurant,
+  createRestaurant,
+  updateRestaurant,
+  deleteRestaurant
+} from './database.js'
+
 const app = express()
 
- app.use(express.json())
-app.get("/users", async(req, res) => {
-    const users = await getUsers()
-    res.send(users)
+app.use(cors())
+app.use(express.json())
+
+// USERS
+app.get("/users", async (req, res) => {
+  res.json(await getUsers())
 })
+
 app.get("/users/:id",async (req,res) => {
     const id = req.params.id
     const user = await getUser(id)
@@ -14,9 +28,35 @@ app.get("/users/:id",async (req,res) => {
 })
 app.post("/users",async (req,res) => {
     const {name ,email,password} = req.body
-    const user = await createNote(name,email,password)
+    const user = await createUser(name,email,password)
     res.status(201).send(user)
 
+})
+
+// RESTAURANTS
+app.get("/restaurants", async (req, res) => {
+  res.json(await getRestaurants())
+})
+
+app.get("/restaurants/:id", async (req, res) => {
+  res.json(await getRestaurant(req.params.id))
+})
+
+app.post("/restaurants", async (req, res) => {
+  const { name, contact, address, owner, rating } = req.body
+  const data = await createRestaurant(name, contact, address, owner, rating)
+  res.status(201).json(data)
+})
+
+app.put("/restaurants/:id", async (req, res) => {
+  const { name, contact, address, owner, rating } = req.body
+  const data = await updateRestaurant(req.params.id, name, contact, address, owner, rating)
+  res.json(data)
+})
+
+app.delete("/restaurants/:id", async (req, res) => {
+  await deleteRestaurant(req.params.id)
+  res.json({ message: "Deleted" })
 })
 
 app.use((err, req, res, next) => {
@@ -25,5 +65,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(5000, () => {
-    console.log('Server is running on port 5000')
+  console.log("Server running on 5000")
 })
